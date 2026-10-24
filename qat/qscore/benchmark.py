@@ -26,6 +26,7 @@
 import pickle
 import importlib
 import argparse
+import time
 from datetime import datetime
 import numpy as np
 from .job_generation import generate_maxcut_job
@@ -147,10 +148,12 @@ class QScore:
             data = []
             for _ in range(_NB_INSTANCES_PER_SIZE):
                 job = generate_maxcut_job(size, self._depth, seed=seed)
+                started = time.perf_counter()
                 result = self._executor.submit(job)
                 score = float(-result.value)
+                duration = time.perf_counter() - started
                 scores.append(score)
-                data.append({"seed": seed, "score": score})
+                data.append({"seed": seed, "score": score, "duration_seconds": duration})
                 seed += 1
             average_score = float(np.mean(scores) - size * (size - 1) / 8)
             avg_best_score = float(0.178 * pow(size, 3 / 2))
@@ -164,6 +167,7 @@ class QScore:
                 "random_best_score": avg_best_score,
                 "ratio": achieved_ratio,
                 "success": achieved_ratio > self._beta,
+                "instance_duration_sum": sum(row["duration_seconds"] for row in data),
             }
             with open(self._rawdata, "wb") as raw_file:
                 pickle.dump(all_data, raw_file)
