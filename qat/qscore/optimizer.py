@@ -21,7 +21,7 @@
     specific language governing permissions and limitations
     under the License.
 """
-from qat.plugins import ScipyMinimizePlugin
+from qat.vsolve.optimize import ScipyMinimizePlugin
 
 
 OPTIMIZER = ScipyMinimizePlugin(
@@ -31,5 +31,4 @@ OPTIMIZER = ScipyMinimizePlugin(
         "maxiter": 300
     }
 )
-
 

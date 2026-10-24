@@ -22,8 +22,8 @@ def detect_if_qlm():
 
 setup(
     name="qat-qscore",
-    description="QScore implementation based on Atos' qat framework.",
+    description="QScore implementation based on Bull's QLM framework.",
     version="0.0.1",
     packages=find_packages(include=["qat.*"]),
-    install_requires=[] if detect_if_qlm() else ["myqlm"],
+    install_requires=["networkx", "numpy"] + ([] if detect_if_qlm() else ["myqlm"]),
 )

@@ -5,14 +5,14 @@
 @brief A QScore run on a perfect simulator
 """
 from qat.qscore.benchmark import QScore
-from qat.plugins import ScipyMinimizePlugin
-from qat.qpus import get_default_qpu
+from qat.vsolve.optimize import ScipyMinimizePlugin
+from qat.pylinalg import PyLinalg
 
 # Our QPU is composed of:
 # - a variational optimizer plugin
-# - a QLM/myQLM default qpu
+# - the myQLM PyLinalg simulator
 
-QPU = ScipyMinimizePlugin(method="COBYLA", tol=1e-4, options={"maxiter": 300}) | get_default_qpu()
+QPU = ScipyMinimizePlugin(method="COBYLA", tol=1e-4, options={"maxiter": 300}) | PyLinalg()
 
 benchmark = QScore(
     QPU,
