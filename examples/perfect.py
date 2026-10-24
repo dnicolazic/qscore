@@ -6,13 +6,13 @@
 """
 from qat.qscore.benchmark import QScore
 from qat.vsolve.optimize import ScipyMinimizePlugin
-from qat.clinalg import CLinalg
+from qat.qpus import get_default_qpu
 
 # Our QPU is composed of:
 # - a variational optimizer plugin
-# - the myQLM CLinalg simulator
+# - a QLM/myQLM default qpu
 
-QPU = ScipyMinimizePlugin(method="COBYLA", tol=1e-4, options={"maxiter": 300}) | CLinalg()
+QPU = ScipyMinimizePlugin(method="COBYLA", tol=1e-4, options={"maxiter": 300}) | get_default_qpu()
 
 benchmark = QScore(
     QPU,
