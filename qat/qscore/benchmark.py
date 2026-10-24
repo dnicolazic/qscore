@@ -106,7 +106,10 @@ class QScore:
 
     def run(self):
         """
-        Runs the benchmark.
+        Runs the benchmark and returns a JSON-serializable result summary.
+
+        The summary contains the boundary status and value, per-size aggregate
+        evaluations, and the raw scores and seeds for each evaluated instance.
         """
         date_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         print(
@@ -122,6 +125,7 @@ class QScore:
             )
         )
         all_data = {}
+        evaluations = {}
         seed = self._seed
         to_output = _HEADER.format(
             date=date_string,
@@ -144,19 +148,27 @@ class QScore:
             for _ in range(_NB_INSTANCES_PER_SIZE):
                 job = generate_maxcut_job(size, self._depth, seed=seed)
                 result = self._executor.submit(job)
-                scores.append(-result.value)
-                data.append({"seed": seed, "score": -result.value})
+                score = float(-result.value)
+                scores.append(score)
+                data.append({"seed": seed, "score": score})
                 seed += 1
-            average_score = np.mean(scores) - size * (size - 1) / 8
-            avg_best_score = 0.178 * pow(size, 3 / 2)
+            average_score = float(np.mean(scores) - size * (size - 1) / 8)
+            avg_best_score = float(0.178 * pow(size, 3 / 2))
+            achieved_ratio = average_score / avg_best_score
             print(f"Score: {average_score:.2f}.", end=" ")
             print(f"Random best score: {avg_best_score:.2f}.", end="\t")
             to_output = f"{size},{average_score},{avg_best_score}\n"
             all_data[size] = data
-            pickle.dump(all_data, open(self._rawdata, "wb"))
+            evaluations[size] = {
+                "average_score": average_score,
+                "random_best_score": avg_best_score,
+                "ratio": achieved_ratio,
+                "success": achieved_ratio > self._beta,
+            }
+            with open(self._rawdata, "wb") as raw_file:
+                pickle.dump(all_data, raw_file)
             with open(self._output, "a") as fout:
                 fout.write(to_output)
-            achieved_ratio = average_score / avg_best_score
             if achieved_ratio > self._beta:
                 print("Success.")
             else:
@@ -166,13 +178,27 @@ class QScore:
         success, _, info = Driver(_evaluate_point, self._iterator, self._initial_size, self._size_limit).run()
 
         if success:
+            status = "boundary"
+            value = info
             print(f"Success. QScore({self._beta}) = {info}")
         else:
             if info[0]:
+                status = "above_limit"
+                value = info[1]
                 print(f"Failure. QScore({self._beta}) > {info[1]}")
                 print("Maybe try to increase the max instance size !")
             else:
+                status = "below_initial"
+                value = info[1]
                 print(f"Failure. QScore({self._beta}) < {info[1]}")
+
+        return {
+            "status": status,
+            "value": int(value),
+            "beta": float(self._beta),
+            "evaluations": evaluations,
+            "raw_data": all_data,
+        }
 
 
 _PARSER = argparse.ArgumentParser(prog="qscore")
