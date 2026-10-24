@@ -12,7 +12,7 @@ def detect_if_qlm():
     If not, we will need to add myQLM to the dependencies of the package.
     """
     try:
-        importlib.import_module("qat.linalg")
+        importlib.import_module("qat.clinalg")
         print("=> Detected a QLM installation. <=")
         return True
     except ModuleNotFoundError:
