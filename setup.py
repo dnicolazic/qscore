@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 def detect_if_qaptiva():
     """
     Detects if this setup is run in a Qaptiva environment.
-    If not, myQLM will be added to the package dependencies.
+    If not, we will need to add myQLM to the dependencies of the package.
     """
     try:
         importlib.import_module("qat.linalg")

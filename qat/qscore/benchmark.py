@@ -125,8 +125,8 @@ class QScore:
                 seed=self._seed,
             )
         )
-        all_data = {}
-        evaluations = {}
+        all_data = {} # Stores raw data for each size
+        evaluations = {} # Stores per-size aggregated stats, returned in the JSON summary
         seed = self._seed
         to_output = _HEADER.format(
             date=date_string,
@@ -155,8 +155,8 @@ class QScore:
                 scores.append(score)
                 data.append({"seed": seed, "score": score, "duration_seconds": duration})
                 seed += 1
-            average_score = float(np.mean(scores) - size * (size - 1) / 8)
-            avg_best_score = float(0.178 * pow(size, 3 / 2))
+            average_score = np.mean(scores) - size * (size - 1) / 8
+            avg_best_score = 0.178 * pow(size, 3 / 2)
             achieved_ratio = average_score / avg_best_score
             print(f"Score: {average_score:.2f}.", end=" ")
             print(f"Random best score: {avg_best_score:.2f}.", end="\t")
@@ -182,19 +182,19 @@ class QScore:
         success, _, info = Driver(_evaluate_point, self._iterator, self._initial_size, self._size_limit).run()
 
         if success:
-            status = "boundary"
+            status = "boundary" # The QScore is exactly at the threshold beta
             value = info
-            print(f"Success. QScore({self._beta}) = {info}")
+            print(f"Success. QScore({self._beta}) = {value}")
         else:
             if info[0]:
-                status = "above_limit"
+                status = "above_limit" # The QScore is above the size limit
                 value = info[1]
-                print(f"Failure. QScore({self._beta}) > {info[1]}")
+                print(f"Failure. QScore({self._beta}) > {value}")
                 print("Maybe try to increase the max instance size !")
             else:
-                status = "below_initial"
+                status = "below_initial" # The QScore is below the initial size
                 value = info[1]
-                print(f"Failure. QScore({self._beta}) < {info[1]}")
+                print(f"Failure. QScore({self._beta}) < {value}")
 
         return {
             "status": status,

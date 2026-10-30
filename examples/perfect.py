@@ -5,7 +5,7 @@
 @brief A QScore run on a perfect simulator
 """
 from qat.qscore.benchmark import QScore
-from qat.vsolve.optimize import ScipyMinimizePlugin
+from qat.plugins import ScipyMinimizePlugin
 from qat.qpus import get_default_qpu
 
 # Our QPU is composed of:
