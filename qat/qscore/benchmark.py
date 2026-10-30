@@ -166,7 +166,7 @@ class QScore:
                 "average_score": average_score,
                 "random_best_score": avg_best_score,
                 "ratio": achieved_ratio,
-                "success": achieved_ratio > self._beta,
+                "success": bool(achieved_ratio > self._beta),
                 "instance_duration_sum": sum(row["duration_seconds"] for row in data),
             }
             with open(self._rawdata, "wb") as raw_file:
