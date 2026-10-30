@@ -155,7 +155,7 @@ class QScore:
                 scores.append(score)
                 data.append({"seed": seed, "score": score, "duration_seconds": duration})
                 seed += 1
-            average_score = np.mean(scores) - size * (size - 1) / 8
+            average_score = float(np.mean(scores) - size * (size - 1) / 8)
             avg_best_score = 0.178 * pow(size, 3 / 2)
             achieved_ratio = average_score / avg_best_score
             print(f"Score: {average_score:.2f}.", end=" ")
